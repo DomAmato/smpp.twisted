@@ -14,7 +14,7 @@ Copyright 2009-2010 Mozes, Inc.
    limitations under the License.
 """
 import logging, binascii
-from twisted.trial import unittest
+from twisted.trial.unittest import TestCase
 from twisted.internet import error, reactor, defer
 from twisted.python import log
 from mock import Mock, sentinel
@@ -23,16 +23,29 @@ import sys
 sys.path.append(".")
 sys.path.append("..")
 sys.path.append("../..")
-from smpp.pdu.error import *
-from smpp.pdu.operations import *
-from smpp.pdu.pdu_types import *
+from smpp.pdu.error import (
+    SMPPClientConnectionCorruptedError,
+    SMPPClientSessionStateError,
+    SMPPClientError
+)
+from smpp.pdu.operations import (
+    SubmitSM,
+    GenericNack,
+    DeliverSM,
+    DeliverSMResp,
+    Unbind,
+    UnbindResp,
+    DataSM,
+    DataSMResp
+)
+from smpp.pdu.pdu_types import CommandStatus, AddrTon, AddrNpi, DeliveryFailureReason
 from smpp.twisted.config import SMPPClientConfig
 from smpp.twisted.protocol import SMPPClientProtocol, SMPPSessionStates, SMPPOutboundTxnResult, DataHandlerResponse
 
 class FakeClientError(SMPPClientError):
     pass
 
-class ProtocolTestCase(unittest.TestCase):
+class ProtocolTestCase(TestCase):
 
     def getProtocolObject(self):
         smpp = SMPPClientProtocol()

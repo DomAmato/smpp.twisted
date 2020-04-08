@@ -251,7 +251,7 @@ class SMPPProtocolBase(Protocol):
             self.PDUDataRequestReceived(reqPDU)
             return
 
-        getattr(self, "onPDURequest_%s" % str(reqPDU.id))(reqPDU)
+        getattr(self, "onPDURequest_%s" % reqPDU.id._name_)(reqPDU)
 
     def onPDURequest_enquire_link(self, reqPDU):
         self.sendResponse(reqPDU)

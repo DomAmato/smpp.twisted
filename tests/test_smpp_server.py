@@ -31,7 +31,7 @@ def _makeMockServerConnection(key, bind_type):
     mk_server_cnxn.bind_type = bind_type
     return mk_server_cnxn
 
-class SMPPServerFactoryTests(unittest.TestCase):
+class SMPPServerFactoryTests(TestCase):
 
     def setUp(self):
         self.config = mock.Mock('mock smpp config')
@@ -161,7 +161,7 @@ class SMPPServerFactoryTests(unittest.TestCase):
         self.assertFalse(can_bind, 'Should not be able to bind as one trx, one tx, and one rx already bound')
 
 
-class SMPPBindManagerTests(unittest.TestCase):
+class SMPPBindManagerTests(TestCase):
 
     def test_getNextBindingForDelivery(self):
         bm = SMPPBindManager('blah')
@@ -411,7 +411,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         pdu = operations.SubmitSM(source_addr='t1', destination_addr='1208230', short_message='HELLO', seqNum=6)
         self.proto.dataReceived(self.encoder.encode(pdu))
         expected_pdu = operations.SubmitSMResp(seqNum=6)
-        self.assertEqual(self.tr.value(), '')
+        self.assertEqual(self.tr.value(), b'')
         pdu = operations.UnbindResp(seqNum=1)
         self.proto.dataReceived(self.encoder.encode(pdu))
 
@@ -463,7 +463,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         self.proto.dataReceived(self.encoder.encode(pdu))
 
         self.assertEqual(1, len(deferreds))
-        self.assertEqual(self.tr.value(), '')
+        self.assertEqual(self.tr.value(), b'')
         self.tr.clear()
         deferreds[-1].callback(pdu_types.CommandStatus.ESME_ROK)
         deferreds = deferreds[:-1]
