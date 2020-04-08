@@ -18,6 +18,11 @@ from twisted.trial import unittest
 from twisted.internet import error, reactor, defer
 from twisted.python import log
 from mock import Mock, sentinel
+import sys
+
+sys.path.append(".")
+sys.path.append("..")
+sys.path.append("../..")
 from smpp.pdu.error import *
 from smpp.pdu.operations import *
 from smpp.pdu.pdu_types import *

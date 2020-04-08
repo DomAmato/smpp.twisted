@@ -20,9 +20,14 @@ from twisted.internet import error, reactor, defer
 from twisted.internet.protocol import Factory 
 from twisted.python import log
 import mock
+import sys
+
+sys.path.append(".")
+sys.path.append("..")
+sys.path.append("../..")
 from smpp.twisted.protocol import SMPPClientProtocol
 from smpp.twisted.client import SMPPClientTransmitter, SMPPClientReceiver, SMPPClientTransceiver, DataHandlerResponse, SMPPClientService
-from smpp.twisted.tests.smsc_simulator import *
+from tests.smsc_simulator import *
 from smpp.pdu.error import *
 from smpp.twisted.config import SMPPClientConfig
 from smpp.pdu.operations import *
