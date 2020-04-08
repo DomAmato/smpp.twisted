@@ -32,10 +32,24 @@ from smpp.pdu.operations import (
 )
 from smpp.pdu.pdu_encoding import PDUEncoder
 from smpp.pdu.pdu_types import PDURequest, PDUResponse, PDUDataRequest, CommandStatus
-import smpp.pdu.error
+from smpp.pdu.error import (
+    SMPPClientConnectionCorruptedError, 
+    PDUCorruptError, 
+    PDUParseError, 
+    SMPPClientSessionStateError, 
+    SessionStateError, 
+    SMPPProtocolError,
+    SMPPClientError,
+    SMPPError,
+    SMPPGenericNackTransactionError,
+    SMPPTransactionError,
+    SMPPRequestTimoutError,
+    SMPPSessionInitTimoutError
+)
 from smpp.pdu.constants import command_status_name_map
 
-from twisted.internet import protocol, defer, reactor
+from twisted.internet.protocol import Protocol
+from twisted.internet import defer, reactor
 from twisted.internet.defer import inlineCallbacks
 from twisted.cred import error
 
@@ -61,7 +75,7 @@ class DataHandlerResponse:
         self.params = params
 
 
-class SMPPProtocolBase(protocol.Protocol):
+class SMPPProtocolBase(Protocol):
     """Short Message Peer to Peer Protocol v3.4 implementing ESME (client)"""
     version = 0x34
 
@@ -81,6 +95,7 @@ class SMPPProtocolBase(protocol.Protocol):
         # Overriden in tests
         self.callLater = reactor.callLater
         self.port = None
+        self.log = logging.getLogger(LOG_CATEGORY)
 
     def config(self):
         return self.factory.getConfig()
@@ -88,7 +103,7 @@ class SMPPProtocolBase(protocol.Protocol):
     def connectionMade(self):
         """When TCP connection is made
         """
-        protocol.Protocol.connectionMade(self)
+        Protocol.connectionMade(self)
         self.port = self.transport.getHost().port
         # Start the inactivity timer the connection is dropped if we receive no data
         self.activateInactivityTimer()
@@ -96,7 +111,7 @@ class SMPPProtocolBase(protocol.Protocol):
         self.log.warning("SMPP connection established from %s to port %s", self.transport.getPeer().host, self.port)
 
     def connectionLost(self, reason):
-        protocol.Protocol.connectionLost(self, reason)
+        Protocol.connectionLost(self, reason)
         self.log.warning("SMPP %s disconnected from port %s: %s", self.transport.getPeer().host, self.port, reason)
 
         self.sessionState = SMPPSessionStates.NONE
@@ -110,8 +125,8 @@ class SMPPProtocolBase(protocol.Protocol):
         """ Looks for a full PDU (protocol data unit) and passes it from
         rawMessageReceived.
         """
-        # if self.log.isEnabledFor(logging.DEBUG):
-        #     self.log.debug("Received data [%s]" % _safelylogOutPdu(data))
+        if self.log.isEnabledFor(logging.DEBUG):
+            self.log.debug("Received data [%s]" % _safelylogOutPdu(data))
 
         self.recvBuffer = self.recvBuffer + data
 
