@@ -806,7 +806,8 @@ class SMPPServerProtocol(SMPPProtocolBase):
     @inlineCallbacks
     def doBindRequest(self, reqPDU, sessionState):
         # Check the authentication
-        system_id, password = reqPDU.params['system_id'], reqPDU.params['password']
+        # Decode from byte strings to strings
+        system_id, password = reqPDU.params['system_id'].decode(), reqPDU.params['password'].decode()
 
         # Authenticate system_id and password
         try:
