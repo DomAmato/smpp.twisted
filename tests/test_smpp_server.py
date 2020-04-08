@@ -8,7 +8,7 @@ from twisted.cred.portal import IRealm
 from twisted.cred.checkers import InMemoryUsernamePasswordDatabaseDontUse
 from twisted.cred.portal import Portal
 from twisted.test import proto_helpers
-from zope.interface import implements
+from zope.interface import implementer
 import sys
 
 sys.path.append(".")
@@ -226,8 +226,8 @@ class SMPPServerBaseTest(TestCase):
         self.service_calls.append((system_id, smpp, pdu))
         return pdu_types.CommandStatus.ESME_ROK
 
+    @implementer(IRealm)
     class SmppRealm:
-        implements(IRealm)
 
         def requestAvatar(self, avatarId, mind, *interfaces):
             return ('SMPP', avatarId, lambda: None)
