@@ -17,7 +17,7 @@ import logging
 from OpenSSL import SSL
 from twisted.internet.protocol import ClientFactory
 from twisted.internet import defer, reactor, ssl
-from twisted.application import service
+from twisted.application.service import Service
 from smpp.twisted.protocol import SMPPClientProtocol, DataHandlerResponse
 
 LOG_CATEGORY="smpp.twisted.client"
@@ -123,18 +123,19 @@ class SMPPClientTransceiver(SMPPClientReceiver):
 
 #TODO - move this to mozes code base since
 # the service support in Twisted is so crappy
-class SMPPClientService(service.Service):
+class SMPPClientService(Service):
 
     def __init__(self, smppClient):
         self.client = smppClient
         self.stopDeferred = defer.Deferred()
+        self.log = logging.getLogger(LOG_CATEGORY)
 
     def getStopDeferred(self):
         return self.stopDeferred
 
     @defer.inlineCallbacks
     def startService(self):
-        service.Service.startService(self)
+        Service.startService(self)
         bindDeferred = self.client.connectAndBind()
         bindDeferred.addErrback(self.handleStartError)
         smpp = yield bindDeferred
@@ -146,7 +147,7 @@ class SMPPClientService(service.Service):
         return error
 
     def stopService(self):
-        service.Service.stopService(self)
+        Service.stopService(self)
         if self.client.smpp:
             self.log.info("Stopping SMPP Client")
             return self.client.smpp.unbindAndDisconnect()

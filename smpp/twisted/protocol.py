@@ -21,10 +21,18 @@ import binascii
 from enum import Enum
 
 from collections import namedtuple
-from smpp.pdu.operations import *
+from smpp.pdu.operations import (
+    GenericNack, 
+    getPDUClass, 
+    EnquireLink, 
+    BindTransmitter, 
+    BindTransceiver, 
+    BindReceiver, 
+    Unbind
+)
 from smpp.pdu.pdu_encoding import PDUEncoder
 from smpp.pdu.pdu_types import PDURequest, PDUResponse, PDUDataRequest, CommandStatus
-from smpp.pdu.error import *
+import smpp.pdu.error
 from smpp.pdu.constants import command_status_name_map
 
 from twisted.internet import protocol, defer, reactor
@@ -33,19 +41,7 @@ from twisted.cred import error
 
 LOG_CATEGORY = "smpp.twisted.protocol"
 
-SMPPSessionStates = Enum('SMPPSessionStates', ','.join([
-    'NONE',
-    'OPEN',
-    'BIND_TX_PENDING',
-    'BOUND_TX',
-    'BIND_RX_PENDING',
-    'BOUND_RX',
-    'BIND_TRX_PENDING',
-    'BOUND_TRX',
-    'UNBIND_PENDING',
-    'UNBIND_RECEIVED',
-    'UNBOUND'])
-)
+SMPPSessionStates = Enum('SMPPSessionStates', 'NONE, OPEN, BIND_TX_PENDING, BOUND_TX, BIND_RX_PENDING, BOUND_RX, BIND_TRX_PENDING, BOUND_TRX, UNBIND_PENDING, UNBIND_RECEIVED, UNBOUND')
 
 SMPPOutboundTxn = namedtuple('SMPPOutboundTxn', 'request, timer, ackDeferred')
 SMPPOutboundTxnResult = namedtuple('SMPPOutboundTxnResult', 'smpp, request, response')

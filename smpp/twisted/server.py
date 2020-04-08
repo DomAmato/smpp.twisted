@@ -41,13 +41,13 @@ class SMPPServerFactory(ServerFactory):
         return self.config
 
     def getBoundConnectionCount(self, system_id):
-        if self.bound_connections.has_key(system_id):
+        if system_id in self.bound_connections:
             return self.bound_connections[system_id].getMaxTransmitReceiveBindCount()
         else:
             return 0
 
     def getBoundConnectionCountsStr(self, system_id):
-        if self.bound_connections.has_key(system_id):
+        if system_id in self.bound_connections:
             bind_counts = self.bound_connections[system_id].getBindingCountByType()
             bound_connections_count = []
             for key, value in bind_counts.items():
