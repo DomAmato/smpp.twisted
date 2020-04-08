@@ -370,7 +370,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         self.assertEqual(self.tr.value(), self.encoder.encode(expected_pdu))
         system_id, smpp, pdu_notified = self.service_calls.pop()
         self.assertEqual(system_id, self.proto.system_id)
-    self.assertEqual(pdu.params['short_message'], pdu_notified.params['short_message'])
+        self.assertEqual(pdu.params['short_message'], pdu_notified.params['short_message'])
         self.assertEqual(pdu.params['source_addr'], pdu_notified.params['source_addr'])
         self.assertEqual(pdu.params['destination_addr'], pdu_notified.params['destination_addr'])
 
