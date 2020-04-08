@@ -345,7 +345,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         expected_pdu = operations.SubmitSMResp(status=pdu_types.CommandStatus.ESME_RINVBNDSTS, seqNum=1)
         self.assertEqual(self.tr.value(), self.encoder.encode(expected_pdu))
 
-    def testUnboundSubmitRequest(self):
+    def testUnboundSubmitRequest2(self):
         pdu = operations.EnquireLink(seqNum = 576)
         self.proto.dataReceived(self.encoder.encode(pdu))
         expected_pdu = operations.EnquireLinkResp(status=pdu_types.CommandStatus.ESME_RINVBNDSTS, seqNum=576)
@@ -430,8 +430,8 @@ class SMPPServerTestCase(SMPPServerBaseTest):
 
         #All PDU requests should fail now.
         #Once we fire this we should get our Submit Resp and the unbind Resp
-    pdu = operations.SubmitSM(source_addr='t1', destination_addr='1208230', short_message='goodbye', seqNum=5)
-    self.proto.dataReceived(self.encoder.encode(pdu))
+        pdu = operations.SubmitSM(source_addr='t1', destination_addr='1208230', short_message='goodbye', seqNum=5)
+        self.proto.dataReceived(self.encoder.encode(pdu))
 
         unbind_resp_pdu = operations.UnbindResp(seqNum=52)
         submit_fail_pdu = operations.SubmitSMResp(status=pdu_types.CommandStatus.ESME_RINVBNDSTS, seqNum=5)
