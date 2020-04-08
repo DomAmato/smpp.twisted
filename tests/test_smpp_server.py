@@ -4,11 +4,11 @@ from twisted.web import resource
 from twisted.internet import defer, reactor, task
 from twisted.application import internet
 from twisted.trial.unittest import TestCase
-from twisted.cred.portal import IRealm    
+from twisted.cred.portal import IRealm
 from twisted.cred.checkers import InMemoryUsernamePasswordDatabaseDontUse
 from twisted.cred.portal import Portal
 from twisted.test import proto_helpers
-from zope.interface import implements      
+from zope.interface import implements
 import sys
 
 sys.path.append(".")
@@ -30,16 +30,16 @@ def _makeMockServerConnection(key, bind_type):
     mk_server_cnxn.system_id = key
     mk_server_cnxn.bind_type = bind_type
     return mk_server_cnxn
-    
+
 class SMPPServerFactoryTests(unittest.TestCase):
 
     def setUp(self):
         self.config = mock.Mock('mock smpp config')
         self.config.systems = {'lala': {'max_bindings': 2}}
-    
+
     def tearDown(self):
         pass
-        
+
     def test_canOpenNewConnection_transceiver(self):
         server = SMPPServerFactory(self.config, None)
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
@@ -48,7 +48,7 @@ class SMPPServerFactoryTests(unittest.TestCase):
         self.assertTrue(can_bind, 'Should be able to bind tx as none bound yet')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertTrue(can_bind, 'Should be able to bind rx as none bound yet')
-        
+
         mk_server_cnxn = _makeMockServerConnection('lala', pdu_types.CommandId.bind_transceiver)
         server.addBoundConnection(mk_server_cnxn)
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
@@ -57,7 +57,7 @@ class SMPPServerFactoryTests(unittest.TestCase):
         self.assertTrue(can_bind, 'Should still be able to bind as only one trx bound')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertTrue(can_bind, 'Should still be able to bind as only one trx bound')
-        
+
         mk_server_cnxn = _makeMockServerConnection('lala', pdu_types.CommandId.bind_transceiver)
         server.addBoundConnection(mk_server_cnxn)
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
@@ -66,7 +66,7 @@ class SMPPServerFactoryTests(unittest.TestCase):
         self.assertFalse(can_bind, 'Should not be able to bind as two trx already bound')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertFalse(can_bind, 'Should not be able to bind as two trx already bound')
-        
+
     def test_canOpenNewConnection_transmitter(self):
         server = SMPPServerFactory(self.config, None)
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
@@ -75,7 +75,7 @@ class SMPPServerFactoryTests(unittest.TestCase):
         self.assertTrue(can_bind, 'Should be able to bind tx as none bound yet')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertTrue(can_bind, 'Should be able to bind rx as none bound yet')
-        
+
         mk_server_cnxn = _makeMockServerConnection('lala', pdu_types.CommandId.bind_transmitter)
         server.addBoundConnection(mk_server_cnxn)
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
@@ -84,7 +84,7 @@ class SMPPServerFactoryTests(unittest.TestCase):
         self.assertTrue(can_bind, 'Should still be able to bind as only one tx bound')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertTrue(can_bind, 'Should still be able to bind only bindings are tx')
-        
+
         mk_server_cnxn = _makeMockServerConnection('lala', pdu_types.CommandId.bind_transmitter)
         server.addBoundConnection(mk_server_cnxn)
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
@@ -94,7 +94,7 @@ class SMPPServerFactoryTests(unittest.TestCase):
         # NOTE this one different
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertTrue(can_bind, 'Should still be able to bind only bindings are tx')
-        
+
     def test_canOpenNewConnection_receiver(self):
         server = SMPPServerFactory(self.config, None)
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
@@ -103,7 +103,7 @@ class SMPPServerFactoryTests(unittest.TestCase):
         self.assertTrue(can_bind, 'Should be able to bind tx as none bound yet')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertTrue(can_bind, 'Should be able to bind rx as none bound yet')
-        
+
         mk_server_cnxn = _makeMockServerConnection('lala', pdu_types.CommandId.bind_receiver)
         server.addBoundConnection(mk_server_cnxn)
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
@@ -112,7 +112,7 @@ class SMPPServerFactoryTests(unittest.TestCase):
         self.assertTrue(can_bind, 'Should still be able to bind only bindings are rx')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertTrue(can_bind, 'Should still be able to bind as only one rx bound')
-        
+
         mk_server_cnxn = _makeMockServerConnection('lala', pdu_types.CommandId.bind_receiver)
         server.addBoundConnection(mk_server_cnxn)
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
@@ -122,17 +122,17 @@ class SMPPServerFactoryTests(unittest.TestCase):
         self.assertTrue(can_bind, 'Should still be able to bind only bindings are rx')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertFalse(can_bind, 'Should not be able to bind as two rx already bound')
-        
+
     def test_canOpenNewConnection_multitypes(self):
         server = SMPPServerFactory(self.config, None)
-        
+
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
         self.assertTrue(can_bind, 'Should be able to bind trx as none bound yet')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transmitter)
         self.assertTrue(can_bind, 'Should be able to bind tx as none bound yet')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertTrue(can_bind, 'Should be able to bind rx as none bound yet')
-        
+
         mk_server_cnxn = _makeMockServerConnection('lala', pdu_types.CommandId.bind_transceiver)
         server.addBoundConnection(mk_server_cnxn)
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
@@ -141,7 +141,7 @@ class SMPPServerFactoryTests(unittest.TestCase):
         self.assertTrue(can_bind, 'Should still be able to bind as only one trx bound')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertTrue(can_bind, 'Should still be able to bind as only one trx bound')
-        
+
         mk_server_cnxn = _makeMockServerConnection('lala', pdu_types.CommandId.bind_transmitter)
         server.addBoundConnection(mk_server_cnxn)
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
@@ -150,7 +150,7 @@ class SMPPServerFactoryTests(unittest.TestCase):
         self.assertFalse(can_bind, 'Should not be able to bind as one trx and one tx already bound')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertTrue(can_bind, 'Should still be able to bind as only one trx and one tx bound')
-        
+
         mk_server_cnxn = _makeMockServerConnection('lala', pdu_types.CommandId.bind_receiver)
         server.addBoundConnection(mk_server_cnxn)
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_transceiver)
@@ -159,41 +159,41 @@ class SMPPServerFactoryTests(unittest.TestCase):
         self.assertFalse(can_bind, 'Should not be able to bind as one trx, one tx, and one rx already bound')
         can_bind = server.canOpenNewConnection('lala', pdu_types.CommandId.bind_receiver)
         self.assertFalse(can_bind, 'Should not be able to bind as one trx, one tx, and one rx already bound')
-        
+
 
 class SMPPBindManagerTests(unittest.TestCase):
-    
+
     def test_getNextBindingForDelivery(self):
         bm = SMPPBindManager('blah')
-        
+
         # add an initial rx
         mk_server_cnxn_rx1 = _makeMockServerConnection('blah', pdu_types.CommandId.bind_receiver)
         bm.addBinding(mk_server_cnxn_rx1)
-        
+
         # Get the only rx
         deliverer = bm.getNextBindingForDelivery()
         self.assertEqual(mk_server_cnxn_rx1, deliverer)
-        
+
         # Get the only rx again
         deliverer = bm.getNextBindingForDelivery()
         self.assertEqual(mk_server_cnxn_rx1, deliverer)
-        
+
         # Add a new rx
         mk_server_cnxn_rx2 = _makeMockServerConnection('blah', pdu_types.CommandId.bind_receiver)
         bm.addBinding(mk_server_cnxn_rx2)
-        
+
         # Get the new rx
         deliverer = bm.getNextBindingForDelivery()
         self.assertEqual(mk_server_cnxn_rx2, deliverer)
-        
+
         # Expect the original rx again
         deliverer = bm.getNextBindingForDelivery()
         self.assertEqual(mk_server_cnxn_rx1, deliverer)
-        
+
         # Add a new tx - shouldn't affect deliverer selection at all
         mk_server_cnxn_tx1 = _makeMockServerConnection('blah', pdu_types.CommandId.bind_transmitter)
         bm.addBinding(mk_server_cnxn_tx1)
-        
+
         # Expect the 2nd rx again
         deliverer = bm.getNextBindingForDelivery()
         self.assertEqual(mk_server_cnxn_rx2, deliverer)
@@ -201,22 +201,22 @@ class SMPPBindManagerTests(unittest.TestCase):
         # Add a new trx
         mk_server_cnxn_trx1 = _makeMockServerConnection('blah', pdu_types.CommandId.bind_transceiver)
         bm.addBinding(mk_server_cnxn_trx1)
-    
+
         # Expect the new trx
         deliverer = bm.getNextBindingForDelivery()
         self.assertEqual(mk_server_cnxn_trx1, deliverer)
-        
+
         # Remove the 1st rx
         bm.removeBinding(mk_server_cnxn_rx1)
-        
+
         # Expect the 2nd rx again
         deliverer = bm.getNextBindingForDelivery()
         self.assertEqual(mk_server_cnxn_rx2, deliverer)
-        
+
         # Expect the new trx
         deliverer = bm.getNextBindingForDelivery()
         self.assertEqual(mk_server_cnxn_trx1, deliverer)
-        
+
         # Expect the 2nd rx again
         deliverer = bm.getNextBindingForDelivery()
         self.assertEqual(mk_server_cnxn_rx2, deliverer)
@@ -296,7 +296,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         self.assertEqual(self.tr.value(), self.encoder.encode(expected_pdu))
         connection = self.factory.getBoundConnections('userA')
         self.assertEqual(connection, None)
- 
+
     def testTransmitterBindRequest(self):
         system_id = 'userA'
         pdu = operations.BindTransmitter(
@@ -338,13 +338,13 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         expected_pdu = operations.SubmitSMResp(seqNum=6)
         self.assertEqual(self.tr.value(), self.encoder.encode(expected_pdu))
 
- 
+
     def testUnboundSubmitRequest(self):
         pdu = operations.SubmitSM(source_addr='t1', destination_addr='1208230', short_message='HELLO', seqNum=1)
         self.proto.dataReceived(self.encoder.encode(pdu))
         expected_pdu = operations.SubmitSMResp(status=pdu_types.CommandStatus.ESME_RINVBNDSTS, seqNum=1)
         self.assertEqual(self.tr.value(), self.encoder.encode(expected_pdu))
-    
+
     def testUnboundSubmitRequest(self):
         pdu = operations.EnquireLink(seqNum = 576)
         self.proto.dataReceived(self.encoder.encode(pdu))
@@ -361,7 +361,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         self.assertEqual(connection.system_id, 'userA')
         # Still in list of binds as the connection has not been closed yet. is removed after test tearDown
         self.assertEqual(connection._binds[pdu_types.CommandId.bind_transceiver][0].sessionState, SMPPSessionStates.UNBOUND)
- 
+
     def testTRXSubmitSM(self):
         self._bind()
         pdu = operations.SubmitSM(source_addr='t1', destination_addr='1208230', short_message='HELLO', seqNum=6)
@@ -370,7 +370,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         self.assertEqual(self.tr.value(), self.encoder.encode(expected_pdu))
         system_id, smpp, pdu_notified = self.service_calls.pop()
         self.assertEqual(system_id, self.proto.system_id)
-	self.assertEqual(pdu.params['short_message'], pdu_notified.params['short_message'])
+    self.assertEqual(pdu.params['short_message'], pdu_notified.params['short_message'])
         self.assertEqual(pdu.params['source_addr'], pdu_notified.params['source_addr'])
         self.assertEqual(pdu.params['destination_addr'], pdu_notified.params['destination_addr'])
 
@@ -382,7 +382,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         self.assertEqual(self.tr.value(), self.encoder.encode(expected_pdu))
         system_id, smpp, pdu_notified = self.service_calls.pop()
         self.assertEqual(system_id, self.proto.system_id)
-        
+
     def testTRXQuerySM(self):
         def _serviceHandler(system_id, smpp, pdu):
             self.service_calls.append((system_id, smpp, pdu))
@@ -401,7 +401,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         self.assertEqual(self.tr.value(), self.encoder.encode(expected_pdu))
         system_id, smpp, pdu_notified = self.service_calls.pop()
         self.assertEqual(system_id, self.proto.system_id)
- 
+
     def testRecievePduWhileUnbindPending(self):
         self._bind()
         self.proto.unbind()
@@ -414,7 +414,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         self.assertEqual(self.tr.value(), '')
         pdu = operations.UnbindResp(seqNum=1)
         self.proto.dataReceived(self.encoder.encode(pdu))
-        
+
     def testTRXClientUnbindRequestAfterSubmit(self):
         d = defer.Deferred()
         def _serviceHandler(system_id, smpp, pdu):
@@ -430,15 +430,15 @@ class SMPPServerTestCase(SMPPServerBaseTest):
 
         #All PDU requests should fail now.
         #Once we fire this we should get our Submit Resp and the unbind Resp
-	pdu = operations.SubmitSM(source_addr='t1', destination_addr='1208230', short_message='goodbye', seqNum=5)
-	self.proto.dataReceived(self.encoder.encode(pdu))
+    pdu = operations.SubmitSM(source_addr='t1', destination_addr='1208230', short_message='goodbye', seqNum=5)
+    self.proto.dataReceived(self.encoder.encode(pdu))
 
         unbind_resp_pdu = operations.UnbindResp(seqNum=52)
         submit_fail_pdu = operations.SubmitSMResp(status=pdu_types.CommandStatus.ESME_RINVBNDSTS, seqNum=5)
         # We should have a reply here as our service handler should not be called
         self.assertEqual(self.tr.value(), self.encoder.encode(submit_fail_pdu))
         self.tr.clear()
-        
+
         d.callback(pdu_types.CommandStatus.ESME_ROK)
         #Then we should get our initial message response and the unbind response
         expected_pdu = operations.SubmitSMResp(seqNum=1)
@@ -461,7 +461,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
 
         pdu2 = operations.SubmitSM(source_addr='t1', destination_addr='1208230', short_message='HELLO2', seqNum=2)
         self.proto.dataReceived(self.encoder.encode(pdu))
-        
+
         self.assertEqual(1, len(deferreds))
         self.assertEqual(self.tr.value(), '')
         self.tr.clear()

@@ -22,22 +22,22 @@ from enum import Enum
 
 from collections import namedtuple
 from smpp.pdu.operations import (
-    GenericNack, 
-    getPDUClass, 
-    EnquireLink, 
-    BindTransmitter, 
-    BindTransceiver, 
-    BindReceiver, 
+    GenericNack,
+    getPDUClass,
+    EnquireLink,
+    BindTransmitter,
+    BindTransceiver,
+    BindReceiver,
     Unbind
 )
 from smpp.pdu.pdu_encoding import PDUEncoder
 from smpp.pdu.pdu_types import PDURequest, PDUResponse, PDUDataRequest, CommandStatus
 from smpp.pdu.error import (
-    SMPPClientConnectionCorruptedError, 
-    PDUCorruptError, 
-    PDUParseError, 
-    SMPPClientSessionStateError, 
-    SessionStateError, 
+    SMPPClientConnectionCorruptedError,
+    PDUCorruptError,
+    PDUParseError,
+    SMPPClientSessionStateError,
+    SessionStateError,
     SMPPProtocolError,
     SMPPClientError,
     SMPPError,
@@ -504,7 +504,7 @@ class SMPPProtocolBase(Protocol):
         if txn is not None:
             if respPDU.status == CommandStatus.ESME_ROK:
                 if not isinstance(respPDU, txn.request.requireAck):
-                    txn.ackDeferred.errback(SMPPProtocolError(respPDU, 
+                    txn.ackDeferred.errback(SMPPProtocolError(respPDU,
                         "Invalid PDU response type [%s] returned for request type [%s]" % (
                         type(respPDU), type(txn.request))))
                     return

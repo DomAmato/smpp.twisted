@@ -17,7 +17,7 @@ import logging
 import functools
 from twisted.trial import unittest
 from twisted.internet import error, reactor, defer
-from twisted.internet.protocol import Factory 
+from twisted.internet.protocol import Factory
 from twisted.python import log
 import mock
 import sys
@@ -36,21 +36,21 @@ from smpp.pdu.pdu_types import *
 class SimulatorTestCase(unittest.TestCase):
     protocol = BlackHoleSMSC
     configArgs = {}
-    
+
     def setUp(self):
         self.factory = Factory()
         self.factory.protocol = self.protocol
         self.port = reactor.listenTCP(0, self.factory)
         self.testPort = self.port.getHost().port
-        
+
         args = self.configArgs.copy()
         args['host'] = self.configArgs.get('host', 'localhost')
         args['port'] = self.configArgs.get('port', self.testPort)
         args['username'] = self.configArgs.get('username', '')
         args['password'] = self.configArgs.get('password', '')
-        
+
         self.config = SMPPClientConfig(**args)
-        
+
     def tearDown(self):
         self.port.stopListening()
 
@@ -58,7 +58,7 @@ class SessionInitTimeoutTestCase(SimulatorTestCase):
     configArgs = {
         'sessionInitTimerSecs': 0.1,
     }
-    
+
     def test_bind_transmitter_timeout(self):
         client = SMPPClientTransmitter(self.config)
         return self.assertFailure(client.connectAndBind(), SMPPSessionInitTimoutError)
@@ -103,7 +103,7 @@ class UnbindTimeoutTestCase(SimulatorTestCase):
             self.assertFailure(self.unbindDeferred, SMPPSessionInitTimoutError), #asserts that unbind timed out
             ]
         )
-        
+
     def do_unbind(self, smpp):
         smpp.unbind().chainDeferred(self.unbindDeferred)
         return smpp
@@ -131,7 +131,7 @@ class ResponseTimeoutTestCase(SimulatorTestCase):
             self.disconnectDeferred, #asserts that disconnect deferred was triggered
             ]
         )
-    
+
     def do_test_setup(self, smpp):
         self.smpp = smpp
         smpp.getDisconnectedDeferred().chainDeferred(self.disconnectDeferred)
@@ -140,7 +140,7 @@ class ResponseTimeoutTestCase(SimulatorTestCase):
         smpp.sendPDU = mock.Mock(wraps=smpp.sendPDU)
         return smpp
 
-    #Test unbind sent    
+    #Test unbind sent
     def verify(self, result):
         self.assertEquals(1, self.smpp.sendPDU.call_count)
         sent = self.smpp.sendPDU.call_args[0][0]
@@ -165,14 +165,14 @@ class InactivityTimeoutTestCase(SimulatorTestCase):
             self.disconnectDeferred, #asserts that disconnect deferred was triggered
             ]
         )
-    
+
     def do_test_setup(self, smpp):
         self.smpp = smpp
         smpp.getDisconnectedDeferred().chainDeferred(self.disconnectDeferred)
         smpp.sendPDU = mock.Mock(wraps=smpp.sendPDU)
         return smpp
 
-    #Test unbind sent    
+    #Test unbind sent
     def verify(self, result):
         self.assertEquals(1, self.smpp.sendPDU.call_count)
         sent = self.smpp.sendPDU.call_args[0][0]
@@ -196,14 +196,14 @@ class ServerInitiatedUnbindTestCase(SimulatorTestCase):
             self.assertFailure(self.submitSMDeferred, SMPPClientSessionStateError), #asserts that outbound txn was canceled
             ]
         )
-        
+
     def mock_stuff(self, smpp):
         self.smpp = smpp
         smpp.getDisconnectedDeferred().chainDeferred(self.disconnectDeferred)
         smpp.sendDataRequest(SubmitSM(source_addr='mobileway', destination_addr='1208230', short_message='HELLO1')).chainDeferred(self.submitSMDeferred)
         smpp.sendPDU = mock.Mock(wraps=smpp.sendPDU)
         return smpp
-        
+
     def verify(self, result):
         self.assertEquals(1, self.smpp.sendPDU.call_count)
         sent = self.smpp.sendPDU.call_args[0][0]
@@ -221,40 +221,40 @@ class EnquireLinkTestCase(SimulatorTestCase):
         smpp = yield client.connect()
         #Assert that enquireLinkTimer is not yet active on connection
         self.assertEquals(None, smpp.enquireLinkTimer)
-        
+
         bindDeferred = client.bind(smpp)
         #Assert that enquireLinkTimer is not yet active until bind is complete
         self.assertEquals(None, smpp.enquireLinkTimer)
         yield bindDeferred
         #Assert that enquireLinkTimer is now active after bind is complete
         self.assertNotEquals(None, smpp.enquireLinkTimer)
-        
+
         #Wrap functions for tracking
         smpp.sendPDU = mock.Mock(wraps=smpp.sendPDU)
         smpp.PDUReceived = mock.Mock(wraps=smpp.PDUReceived)
-        
+
         yield self.wait(0.25)
-        
+
         self.verifyEnquireLink(smpp)
-        
+
         #Assert that enquireLinkTimer is still active
         self.assertNotEquals(None, smpp.enquireLinkTimer)
-        
+
         unbindDeferred = smpp.unbind()
 
         #Assert that enquireLinkTimer is no longer active after unbind is issued
         self.assertEquals(None, smpp.enquireLinkTimer)
-        
+
         yield unbindDeferred
         #Assert that enquireLinkTimer is no longer active after unbind is complete
         self.assertEquals(None, smpp.enquireLinkTimer)
         yield smpp.disconnect()
-        
+
     def wait(self, time_secs):
         finished = defer.Deferred()
         reactor.callLater(time_secs, finished.callback, None)
         return finished
-                
+
     def verifyEnquireLink(self, smpp):
         self.assertEquals(4, smpp.sendPDU.call_count)
         self.assertEquals(4, smpp.PDUReceived.call_count)
@@ -269,16 +269,16 @@ class EnquireLinkTestCase(SimulatorTestCase):
 
         self.assertEquals(EnquireLink(2), sent1)
         self.assertEquals(EnquireLinkResp(2), recv1)
-        
+
         self.assertEquals(EnquireLink(1), recv2)
         self.assertEquals(EnquireLinkResp(1), sent2)
-        
+
         self.assertEquals(EnquireLink(3), sent3)
         self.assertEquals(EnquireLinkResp(3), recv3)
-        
+
         self.assertEquals(EnquireLink(2), recv4)
         self.assertEquals(EnquireLinkResp(2), sent4)
-        
+
 class TransmitterLifecycleTestCase(SimulatorTestCase):
     protocol = HappySMSC
 
@@ -298,11 +298,11 @@ class TransmitterLifecycleTestCase(SimulatorTestCase):
             self.disconnectDeferred, #asserts that disconnect was successful
             ]
         )
-        
+
     def do_lifecycle(self, smpp):
         smpp.getDisconnectedDeferred().chainDeferred(self.disconnectDeferred)
         smpp.sendDataRequest(SubmitSM()).chainDeferred(self.submitSMDeferred).addCallback(lambda result: smpp.unbindAndDisconnect().chainDeferred(self.unbindDeferred))
-        return smpp        
+        return smpp
 
 class AlertNotificationTestCase(SimulatorTestCase):
     protocol = AlertNotificationSMSC
@@ -311,24 +311,24 @@ class AlertNotificationTestCase(SimulatorTestCase):
     def test_alert_notification(self):
         client = SMPPClientTransmitter(self.config)
         smpp = yield client.connectAndBind()
-        
+
         alertNotificationDeferred = defer.Deferred()
         alertHandler = mock.Mock(wraps=lambda smpp, pdu: alertNotificationDeferred.callback(None))
         smpp.setAlertNotificationHandler(alertHandler)
-                
+
         sendDataDeferred = smpp.sendDataRequest(DataSM())
-        
+
         smpp.sendPDU = mock.Mock(wraps=smpp.sendPDU)
         smpp.PDUReceived = mock.Mock(wraps=smpp.PDUReceived)
-        
+
         yield sendDataDeferred
         yield alertNotificationDeferred
         yield smpp.unbindAndDisconnect()
-        
+
         self.assertEquals(1, alertHandler.call_count)
         self.assertEquals(smpp, alertHandler.call_args[0][0])
         self.assertTrue(isinstance(alertHandler.call_args[0][1], AlertNotification))
-        
+
         self.assertEquals(1, smpp.sendPDU.call_count)
         self.assertEquals(3, smpp.PDUReceived.call_count)
         sent1 = smpp.sendPDU.call_args[0][0]
@@ -373,19 +373,19 @@ class CommandLengthTooLongTestCase(SimulatorTestCase):
     def test_generic_nack_on_invalid_cmd_len(self):
         client = SMPPClientTransceiver(self.config, lambda smpp, pdu: None)
         smpp = yield client.connectAndBind()
-        
+
         msgSentDeferred = defer.Deferred()
-        
+
         smpp.sendPDU = mock.Mock()
         smpp.sendPDU.side_effect = functools.partial(self.mock_side_effect, msgSentDeferred)
-        
+
         yield msgSentDeferred
-        
+
         yield smpp.disconnect()
-        
+
         self.assertEquals(1, smpp.sendPDU.call_count)
         smpp.sendPDU.assert_called_with(GenericNack(status=CommandStatus.ESME_RINVCMDLEN))
-        
+
     def mock_side_effect(self, msgSentDeferred, pdu):
         msgSentDeferred.callback(None)
         return mock.DEFAULT
@@ -397,23 +397,23 @@ class InvalidCommandIdTestCase(SimulatorTestCase):
     def test_generic_nack_on_invalid_cmd_id(self):
         client = SMPPClientTransceiver(self.config, lambda smpp, pdu: None)
         smpp = yield client.connectAndBind()
-        
+
         msgSentDeferred = defer.Deferred()
-        
+
         smpp.sendPDU = mock.Mock()
         smpp.sendPDU.side_effect = functools.partial(self.mock_side_effect, msgSentDeferred)
-        
+
         yield msgSentDeferred
-        
+
         yield smpp.disconnect()
-        
+
         self.assertEquals(1, smpp.sendPDU.call_count)
         smpp.sendPDU.assert_called_with(GenericNack(status=CommandStatus.ESME_RINVCMDID))
-    
+
     def mock_side_effect(self, msgSentDeferred, pdu):
         msgSentDeferred.callback(None)
         return mock.DEFAULT
-                
+
 class NonFatalParseErrorTestCase(SimulatorTestCase):
     protocol = NonFatalParseErrorSMSC
 
@@ -421,23 +421,23 @@ class NonFatalParseErrorTestCase(SimulatorTestCase):
     def test_nack_on_invalid_msg(self):
         client = SMPPClientTransceiver(self.config, lambda smpp, pdu: None)
         smpp = yield client.connectAndBind()
-        
+
         msgSentDeferred = defer.Deferred()
-        
+
         smpp.sendPDU = mock.Mock()
         smpp.sendPDU.side_effect = functools.partial(self.mock_side_effect, msgSentDeferred)
-        
+
         yield msgSentDeferred
-        
+
         yield smpp.disconnect()
-        
+
         self.assertEquals(1, smpp.sendPDU.call_count)
         smpp.sendPDU.assert_called_with(QuerySMResp(seqNum=self.protocol.seqNum, status=CommandStatus.ESME_RINVSRCTON))
-                    
+
     def mock_side_effect(self, msgSentDeferred, pdu):
         msgSentDeferred.callback(None)
         return mock.DEFAULT
-        
+
 class GenericNackNoSeqNumTestCase(SimulatorTestCase):
     protocol = GenericNackNoSeqNumOnSubmitSMSC
 
@@ -445,7 +445,7 @@ class GenericNackNoSeqNumTestCase(SimulatorTestCase):
     def test_generic_nack_no_seq_num(self):
         client = SMPPClientTransceiver(self.config, lambda smpp, pdu: None)
         smpp = yield client.connectAndBind()
-        
+
         try:
             submitDeferred = smpp.sendDataRequest(SubmitSM())
             smpp.sendPDU = mock.Mock(wraps=smpp.sendPDU)
@@ -454,10 +454,10 @@ class GenericNackNoSeqNumTestCase(SimulatorTestCase):
             pass
         else:
             self.assertTrue(False, "SMPPClientConnectionCorruptedError not raised")
-            
+
         #for nack with no seq num, the connection is corrupt so don't unbind()
-        self.assertEquals(0, smpp.sendPDU.call_count)      
-        
+        self.assertEquals(0, smpp.sendPDU.call_count)
+
 class GenericNackWithSeqNumTestCase(SimulatorTestCase):
     protocol = GenericNackWithSeqNumOnSubmitSMSC
 
@@ -465,7 +465,7 @@ class GenericNackWithSeqNumTestCase(SimulatorTestCase):
     def test_generic_nack_no_seq_num(self):
         client = SMPPClientTransceiver(self.config, lambda smpp, pdu: None)
         smpp = yield client.connectAndBind()
-        
+
         try:
             yield smpp.sendDataRequest(SubmitSM())
         except SMPPGenericNackTransactionError:
@@ -474,7 +474,7 @@ class GenericNackWithSeqNumTestCase(SimulatorTestCase):
             self.assertTrue(False, "SMPPGenericNackTransactionError not raised")
         finally:
             yield smpp.unbindAndDisconnect()
-                
+
 class ErrorOnSubmitTestCase(SimulatorTestCase):
     protocol = ErrorOnSubmitSMSC
 
@@ -490,7 +490,7 @@ class ErrorOnSubmitTestCase(SimulatorTestCase):
             self.assertTrue(False, "SMPPTransactionError not raised")
         finally:
             yield smpp.unbindAndDisconnect()
-        
+
 class ReceiverLifecycleTestCase(SimulatorTestCase):
     protocol = DeliverSMAndUnbindSMSC
 
@@ -498,12 +498,12 @@ class ReceiverLifecycleTestCase(SimulatorTestCase):
     def test_receiver_lifecycle(self):
         client = SMPPClientReceiver(self.config, lambda smpp, pdu: None)
         smpp = yield client.connectAndBind()
-        
+
         smpp.PDUReceived = mock.Mock(wraps=smpp.PDUReceived)
         smpp.sendPDU = mock.Mock(wraps=smpp.sendPDU)
-        
+
         yield smpp.getDisconnectedDeferred()
-        
+
         self.assertEquals(2, smpp.PDUReceived.call_count)
         self.assertEquals(2, smpp.sendPDU.call_count)
         recv1 = smpp.PDUReceived.call_args_list[0][0][0]
@@ -522,12 +522,12 @@ class ReceiverDataHandlerExceptionTestCase(SimulatorTestCase):
     def test_receiver_exception(self):
         client = SMPPClientReceiver(self.config, self.barf)
         smpp = yield client.connectAndBind()
-        
+
         smpp.PDUReceived = mock.Mock(wraps=smpp.PDUReceived)
         smpp.sendPDU = mock.Mock(wraps=smpp.sendPDU)
-        
+
         yield smpp.getDisconnectedDeferred()
-        
+
         self.assertEquals(2, smpp.PDUReceived.call_count)
         self.assertEquals(2, smpp.sendPDU.call_count)
         recv1 = smpp.PDUReceived.call_args_list[0][0][0]
@@ -538,10 +538,10 @@ class ReceiverDataHandlerExceptionTestCase(SimulatorTestCase):
         self.assertEquals(recv1.requireAck(recv1.seqNum, CommandStatus.ESME_RX_T_APPN), sent1)
         self.assertTrue(isinstance(sent2, Unbind))
         self.assertTrue(isinstance(recv2, UnbindResp))
-                
+
     def barf(self, smpp, pdu):
         raise ValueError('barf')
-        
+
 class ReceiverDataHandlerBadResponseParamTestCase(SimulatorTestCase):
     protocol = DeliverSMSMSC
 
@@ -549,12 +549,12 @@ class ReceiverDataHandlerBadResponseParamTestCase(SimulatorTestCase):
     def test_receiver_bad_resp_param(self):
         client = SMPPClientReceiver(self.config, self.respondBadParam)
         smpp = yield client.connectAndBind()
-        
+
         smpp.PDUReceived = mock.Mock(wraps=smpp.PDUReceived)
         smpp.sendPDU = mock.Mock(wraps=smpp.sendPDU)
-        
+
         yield smpp.getDisconnectedDeferred()
-        
+
         self.assertEquals(2, smpp.PDUReceived.call_count)
         self.assertEquals(2, smpp.sendPDU.call_count)
         recv1 = smpp.PDUReceived.call_args_list[0][0][0]
@@ -565,7 +565,7 @@ class ReceiverDataHandlerBadResponseParamTestCase(SimulatorTestCase):
         self.assertEquals(recv1.requireAck(recv1.seqNum, CommandStatus.ESME_RX_T_APPN), sent1)
         self.assertTrue(isinstance(sent2, Unbind))
         self.assertTrue(isinstance(recv2, UnbindResp))
-        
+
     def respondBadParam(self, smpp, pdu):
         return DataHandlerResponse(delivery_failure_reason=DeliveryFailureReason.PERMANENT_NETWORK_ERROR)
 
@@ -606,13 +606,13 @@ class SMPPClientServiceBindTimeoutTestCase(SimulatorTestCase):
         return defer.DeferredList([
             self.assertFailure(startDeferred, SMPPSessionInitTimoutError),
             self.assertFailure(stopDeferred, SMPPSessionInitTimoutError),
-        ])    
-        
+        ])
+
 if __name__ == '__main__':
     observer = log.PythonLoggingObserver()
     observer.start()
     logging.basicConfig(level=logging.DEBUG)
-    
+
     import sys
     from twisted.scripts import trial
     sys.argv.extend([sys.argv[0]])
