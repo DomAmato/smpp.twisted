@@ -471,6 +471,8 @@ class SMPPServerTestCase(SMPPServerBaseTest):
 
         unbind_pdu = operations.Unbind(seqNum=1)
         # We should have a reply here as our service handler should not be called
+        logging.info(self.encoder.encode(submit_resp_pdu))
+        logging.info(self.encoder.encode(unbind_pdu))
         self.assertEqual(self.tr.value(), '%s%s' % (self.encoder.encode(submit_resp_pdu), self.encoder.encode(unbind_pdu)))
         self.tr.clear()
         pdu = operations.UnbindResp(seqNum=1)
