@@ -32,5 +32,5 @@ jobs:
         COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
         pip install coveralls mock
-        coverage run `which trial` smpp
+        coverage run --source=smpp -m twisted.trial tests
         coveralls
