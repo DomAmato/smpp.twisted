@@ -209,7 +209,7 @@ class CommandLengthTooShortSMSC(BlackHoleSMSC):
         encoded = self.encoder.encode(unbind)
         hexEncoded = binascii.b2a_hex(encoded)
         # Overwrite the command length (first octet)
-        badCmdLenHex = '0000000f'
+        badCmdLenHex = b'0000000f'
         badHexEncoded = badCmdLenHex + hexEncoded[len(badCmdLenHex):]
         self.log.debug("Sending PDU with cmd len too small [%s]" % badHexEncoded)
         badEncoded = binascii.a2b_hex(badHexEncoded)
@@ -232,7 +232,7 @@ class CommandLengthTooLongSMSC(BlackHoleSMSC):
         encoded = self.encoder.encode(unbind)
         hexEncoded = binascii.b2a_hex(encoded)
         # Overwrite the command length (first octet)
-        badCmdLenHex = '0000ffff'
+        badCmdLenHex = b'0000ffff'
         badHexEncoded = badCmdLenHex + hexEncoded[len(badCmdLenHex):]
         self.log.debug("Sending PDU with cmd len too large [%s]" % badHexEncoded)
         badEncoded = binascii.a2b_hex(badHexEncoded)
@@ -283,7 +283,7 @@ class NonFatalParseErrorSMSC(BlackHoleSMSC):
         encoded = self.encoder.encode(pdu)
         hexEncoded = binascii.b2a_hex(encoded)
         # Overwrite the source_addr_ton param (18th octet)
-        badSrcAddrTonHex = '07'
+        badSrcAddrTonHex = b'07'
         badIdx = 17 * 2
         badHexEncoded = hexEncoded[:badIdx] + badSrcAddrTonHex + hexEncoded[(badIdx + len(badSrcAddrTonHex)):]
         self.log.debug("Sending PDU with invalid source_addr_ton [%s]" % badHexEncoded)
