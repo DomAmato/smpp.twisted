@@ -15,6 +15,7 @@ import collections
 
 LOG_CATEGORY="smpp.twisted.server"
 
+#pylint: disable=inherit-non-class
 class IAuthenticatedSMPP(Interface):
     pass
 

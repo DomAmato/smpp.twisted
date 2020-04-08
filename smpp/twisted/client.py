@@ -37,6 +37,7 @@ class SMPPClientFactory(ClientFactory):
     def buildProtocol(self, addr):
         p = ClientFactory.buildProtocol(self, addr)
         #This is a sneaky way of passing the protocol instance back to the caller
+        #pylint: disable=no-member
         reactor.callLater(0, self.buildProtocolDeferred.callback, p)
         return p
 
@@ -71,9 +72,11 @@ class SMPPClientBase:
         factory = SMPPClientFactory(self.config)
         if self.config.useSSL:
             self.log.warning('Establishing SSL connection to %s:%d' % (self.config.host, self.config.port))
+            #pylint: disable=no-member
             reactor.connectSSL(self.config.host, self.config.port, factory, CtxFactory(self.config))
         else:
             self.log.warning('Establishing TCP connection to %s:%d' % (self.config.host, self.config.port))
+            #pylint: disable=no-member
             reactor.connectTCP(self.config.host, self.config.port, factory)
         return factory.buildProtocolDeferred.addCallback(self.onConnect)
 

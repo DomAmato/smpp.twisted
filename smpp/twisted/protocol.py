@@ -504,7 +504,7 @@ class SMPPProtocolBase(Protocol):
         if txn is not None:
             if respPDU.status == CommandStatus.ESME_ROK:
                 if not isinstance(respPDU, txn.request.requireAck):
-                    txn.ackDeferred.errback(SMPPProtocolError(
+                    txn.ackDeferred.errback(SMPPProtocolError(respPDU, 
                         "Invalid PDU response type [%s] returned for request type [%s]" % (
                         type(respPDU), type(txn.request))))
                     return
