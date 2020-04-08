@@ -288,13 +288,3 @@ class ProtocolTestCase(TestCase):
         self.assertEquals(1, smpp.sendPDU.call_count)
         sent = smpp.sendPDU.call_args[0][0]
         self.assertEquals(DeliverSMResp(5, CommandStatus.ESME_RX_T_APPN), sent)
-
-if __name__ == '__main__':
-    observer = log.PythonLoggingObserver()
-    observer.start()
-    logging.basicConfig(level=logging.DEBUG)
-
-    import sys
-    from twisted.scripts import trial
-    sys.argv.extend([sys.argv[0]])
-    trial.run()

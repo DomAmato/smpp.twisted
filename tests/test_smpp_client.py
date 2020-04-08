@@ -639,13 +639,3 @@ class SMPPClientServiceBindTimeoutTestCase(SimulatorTestCase):
             self.assertFailure(startDeferred, SMPPSessionInitTimoutError),
             self.assertFailure(stopDeferred, SMPPSessionInitTimoutError),
         ])
-
-if __name__ == '__main__':
-    observer = log.PythonLoggingObserver()
-    observer.start()
-    logging.basicConfig(level=logging.DEBUG)
-
-    import sys
-    from twisted.scripts import trial
-    sys.argv.extend([sys.argv[0]])
-    trial.run()
