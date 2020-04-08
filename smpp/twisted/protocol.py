@@ -302,7 +302,7 @@ class SMPPProtocolBase(Protocol):
             status = CommandStatus.ESME_ROK
             params = {}
             if dataHdlrResp:
-                if dataHdlrResp in CommandStatus:
+                if dataHdlrResp in list(CommandStatus):
                     status = dataHdlrResp
                 elif isinstance(dataHdlrResp, DataHandlerResponse):
                     status = dataHdlrResp.status
