@@ -349,7 +349,7 @@ class SMPPProtocolBase(Protocol):
         return defer.DeferredList(self.inTxns.values())
 
     def finishOutboundTxns(self):
-        return defer.DeferredList([txn.ackDeferred for txn in self.outTxns.values()])
+        return defer.DeferredList([txn.ackDeferred for txn in list(self.outTxns.values())])
 
     def PDUResponseReceived(self, pdu):
         """Handle incoming response PDUs
@@ -528,7 +528,7 @@ class SMPPProtocolBase(Protocol):
             txn.ackDeferred.errback(error)
 
     def cancelOutboundTransactions(self, error):
-        for txn in self.outTxns.values():
+        for txn in list(self.outTxns.values()):
             self.endOutboundTransactionErr(txn.request, error)
 
     def onResponseTimeout(self, reqPDU, timeout):
