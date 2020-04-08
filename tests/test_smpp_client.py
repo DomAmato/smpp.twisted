@@ -373,6 +373,7 @@ class AlertNotificationTestCase(SimulatorTestCase):
 class CommandLengthTooShortTestCase(SimulatorTestCase):
     protocol = smsc_simulator.CommandLengthTooShortSMSC
 
+    @defer.inlineCallbacks
     def test_generic_nack_on_invalid_cmd_len(self):
         client = SMPPClientTransceiver(self.config, lambda smpp, pdu: None)
         smpp = yield client.connectAndBind()
