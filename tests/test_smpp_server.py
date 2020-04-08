@@ -440,9 +440,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         d.callback(pdu_types.CommandStatus.ESME_ROK)
         #Then we should get our initial message response and the unbind response
         expected_pdu = operations.SubmitSMResp(seqNum=1)
-        logging.warning(b"ENCODE_FLAG" + self.encoder.encode(expected_pdu))
-        logging.warning(b"ENCODE_FLAG" + self.encoder.encode(unbind_resp_pdu))
-        self.assertEqual(self.tr.value(), '%s%s' % (self.encoder.encode(expected_pdu), self.encoder.encode(unbind_resp_pdu)))
+        self.assertEqual(self.tr.value(), b'%s%s' % (self.encoder.encode(expected_pdu), self.encoder.encode(unbind_resp_pdu)))
 
     def testTRXServerUnbindRequestAfterSubmit(self):
         deferreds = []
@@ -471,9 +469,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
 
         unbind_pdu = operations.Unbind(seqNum=1)
         # We should have a reply here as our service handler should not be called
-        logging.warning(b"ENCODE_FLAG" + self.encoder.encode(submit_resp_pdu))
-        logging.warning(b"ENCODE_FLAG" + self.encoder.encode(unbind_pdu))
-        self.assertEqual(self.tr.value(), '%s%s' % (self.encoder.encode(submit_resp_pdu), self.encoder.encode(unbind_pdu)))
+        self.assertEqual(self.tr.value(), b'%s%s' % (self.encoder.encode(submit_resp_pdu), self.encoder.encode(unbind_pdu)))
         self.tr.clear()
         pdu = operations.UnbindResp(seqNum=1)
         self.proto.dataReceived(self.encoder.encode(pdu))
