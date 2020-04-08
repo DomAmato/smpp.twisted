@@ -17,16 +17,29 @@ from io import BytesIO
 import logging
 import struct
 import binascii
-from twisted.internet.protocol import Protocol, Factory
-from twisted.internet import reactor, protocol
-from smpp.pdu.operations import *
+
+from twisted.internet.protocol import Protocol
+from smpp.pdu.operations import (
+    GenericNack,
+    EnquireLink,
+    BindTransmitter,
+    BindTransceiver,
+    BindReceiver,
+    Unbind,
+    SubmitSM,
+    DataSM,
+    AlertNotification,
+    DeliverSM,
+    QuerySM,
+    Outbind
+)
 from smpp.pdu.pdu_encoding import PDUEncoder
-from smpp.pdu.pdu_types import *
+from smpp.pdu.pdu_types import CommandStatus, PDURequest, AddrTon
 
 LOG_CATEGORY = "smpp.twisted.tests.smsc_simulator"
 
 
-class BlackHoleSMSC(protocol.Protocol):
+class BlackHoleSMSC(Protocol):
     responseMap = {}
 
     def __init__(self):
@@ -242,7 +255,7 @@ class InvalidCommandIdSMSC(BlackHoleSMSC):
         encoded = self.encoder.encode(unbind)
         hexEncoded = binascii.b2a_hex(encoded)
         # Overwrite the command id (second octet)
-        badCmdIdHex = 'f0000009'
+        badCmdIdHex = b'f0000009'
         badHexEncoded = hexEncoded[:8] + badCmdIdHex + hexEncoded[8 + len(badCmdIdHex):]
         self.log.debug("Sending PDU with invalid cmd id [%s]" % badHexEncoded)
         badEncoded = binascii.a2b_hex(badHexEncoded)
@@ -332,11 +345,3 @@ class DeliverSMAndUnbindSMSC(DeliverSMSMSC):
     def sendDeliverSM(self, reqPDU):
         DeliverSMSMSC.sendDeliverSM(self, reqPDU)
         self.sendPDU(Unbind())
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    factory = Factory()
-    factory.protocol = BlackHoleSMSC
-    reactor.listenTCP(8007, factory)
-    reactor.run()

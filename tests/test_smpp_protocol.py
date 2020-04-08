@@ -13,10 +13,10 @@ Copyright 2009-2010 Mozes, Inc.
    See the License for the specific language governing permissions and
    limitations under the License.
 """
-import logging, binascii
+import logging
+import binascii
 from twisted.trial.unittest import TestCase
-from twisted.internet import error, reactor, defer
-from twisted.python import log
+from twisted.internet import error, defer
 from mock import Mock, sentinel
 import sys
 

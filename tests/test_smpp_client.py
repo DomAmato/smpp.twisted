@@ -18,7 +18,6 @@ import functools
 from twisted.trial.unittest import TestCase
 from twisted.internet import error, reactor, defer
 from twisted.internet.protocol import Factory
-from twisted.python import log
 import mock
 import sys
 
@@ -61,7 +60,6 @@ from smpp.pdu.operations import (
     DeliverSM,
     QuerySMResp,
     DataSMResp
-
 )
 from smpp.pdu.pdu_types import DeliveryFailureReason, CommandStatus
 

@@ -1,8 +1,6 @@
 import unittest
 import logging
-from twisted.web import resource
-from twisted.internet import defer, reactor, task
-from twisted.application import internet
+from twisted.internet import defer, task
 from twisted.trial.unittest import TestCase
 from twisted.cred.portal import IRealm
 from twisted.cred.checkers import InMemoryUsernamePasswordDatabaseDontUse
