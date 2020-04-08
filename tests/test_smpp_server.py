@@ -314,7 +314,7 @@ class SMPPServerTestCase(SMPPServerBaseTest):
         self.assertTrue(delivery_binding is None)
 
     def testReceiverBindRequest(self):
-        system_id = b'userA'
+        system_id = 'userA'
         pdu = operations.BindReceiver(
             system_id = system_id,
             password = 'valid',

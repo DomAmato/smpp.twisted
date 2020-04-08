@@ -75,7 +75,7 @@ class ProtocolTestCase(TestCase):
         nackResp = smpp.sendPDU.call_args[0][0]
         self.assertEquals(GenericNack(seqNum=None, status=CommandStatus.ESME_RINVCMDLEN), nackResp)
         #Causes new data received to be ignored
-        newDataHex = 'afc4'
+        newDataHex = b'afc4'
         smpp.dataReceived(binascii.a2b_hex(newDataHex))
         self.assertEquals(newDataHex, binascii.b2a_hex(smpp.recvBuffer))
         #Causes new data requests to fail immediately
