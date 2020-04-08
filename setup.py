@@ -1,10 +1,9 @@
 import os
-from setuptools import setup, find_packages
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 setup(
     name = "smpp.twisted",
     version = "0.4",
@@ -12,7 +11,7 @@ setup(
     author_email = "roger.hoover@gmail.com",
     description = "SMPP 3.4 client built on Twisted",
     license = 'Apache License 2.0',
-    packages = find_packages(),
+    packages = find_namespace_packages(include=['smpp.*']),
     long_description=read('README.md'),
     keywords = "smpp twisted",
     url = "https://github.com/mozes/smpp.twisted",
