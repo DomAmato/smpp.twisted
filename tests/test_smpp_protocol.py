@@ -60,7 +60,7 @@ class ProtocolTestCase(TestCase):
 
     def test_corruptData(self):
         smpp = self.getProtocolObject()
-        self.assertEquals('', smpp.recvBuffer)
+        self.assertEquals(b'', smpp.recvBuffer)
         smpp.sendPDU = Mock()
         smpp.cancelOutboundTransactions = Mock()
         smpp.shutdown = Mock()
