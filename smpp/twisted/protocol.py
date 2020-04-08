@@ -242,7 +242,7 @@ class SMPPProtocolBase(Protocol):
         elif isinstance(pdu, PDUResponse):
             self.PDUResponseReceived(pdu)
         else:
-            getattr(self, "onPDU_%s" % str(pdu.id))(pdu)
+            getattr(self, "onPDU_%s" % pdu.id._name_)(pdu)
 
     def PDURequestReceived(self, reqPDU):
         """Handle incoming request PDUs
