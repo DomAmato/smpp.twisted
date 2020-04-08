@@ -15,7 +15,7 @@ Copyright 2009-2010 Mozes, Inc.
 """
 import logging
 import functools
-from twisted.trial import unittest
+from twisted.trial.unittest import TestCase
 from twisted.internet import error, reactor, defer
 from twisted.internet.protocol import Factory
 from twisted.python import log
@@ -25,16 +25,48 @@ import sys
 sys.path.append(".")
 sys.path.append("..")
 sys.path.append("../..")
+import tests.smsc_simulator as smsc_simulator
+from smpp.twisted.config import SMPPClientConfig
+
 from smpp.twisted.protocol import SMPPClientProtocol
 from smpp.twisted.client import SMPPClientTransmitter, SMPPClientReceiver, SMPPClientTransceiver, DataHandlerResponse, SMPPClientService
-from tests.smsc_simulator import *
-from smpp.pdu.error import *
-from smpp.twisted.config import SMPPClientConfig
-from smpp.pdu.operations import *
-from smpp.pdu.pdu_types import *
 
-class SimulatorTestCase(unittest.TestCase):
-    protocol = BlackHoleSMSC
+from smpp.pdu.error import (
+    SMPPClientConnectionCorruptedError,
+    PDUCorruptError,
+    PDUParseError,
+    SMPPClientSessionStateError,
+    SessionStateError,
+    SMPPProtocolError,
+    SMPPClientError,
+    SMPPError,
+    SMPPGenericNackTransactionError,
+    SMPPTransactionError,
+    SMPPRequestTimoutError,
+    SMPPSessionInitTimoutError
+)
+from smpp.pdu.operations import (
+    GenericNack,
+    getPDUClass,
+    EnquireLink,
+    BindTransmitter,
+    BindTransceiver,
+    BindReceiver,
+    Unbind,
+    SubmitSM,
+    UnbindResp,
+    EnquireLinkResp,
+    DataSM,
+    AlertNotification,
+    DeliverSM,
+    QuerySMResp,
+    DataSMResp
+
+)
+from smpp.pdu.pdu_types import DeliveryFailureReason, CommandStatus
+
+class SimulatorTestCase(TestCase):
+    protocol = smsc_simulator.BlackHoleSMSC
     configArgs = {}
 
     def setUp(self):
@@ -72,21 +104,21 @@ class SessionInitTimeoutTestCase(SimulatorTestCase):
         return self.assertFailure(client.connectAndBind(), SMPPSessionInitTimoutError)
 
 class BindErrorTestCase(SimulatorTestCase):
-    protocol = BindErrorSMSC
+    protocol = smsc_simulator.BindErrorSMSC
 
     def test_bind_error(self):
         client = SMPPClientTransmitter(self.config)
         return self.assertFailure(client.connectAndBind(), SMPPTransactionError)
 
 class BindErrorGenericNackTestCase(SimulatorTestCase):
-    protocol = BindErrorGenericNackSMSC
+    protocol = smsc_simulator.BindErrorGenericNackSMSC
 
     def test_bind_error_generic_nack(self):
         client = SMPPClientTransmitter(self.config)
         return self.assertFailure(client.connectAndBind(), SMPPGenericNackTransactionError)
 
 class UnbindTimeoutTestCase(SimulatorTestCase):
-    protocol = UnbindNoResponseSMSC
+    protocol = smsc_simulator.UnbindNoResponseSMSC
     configArgs = {
         'sessionInitTimerSecs': 0.1,
     }
@@ -109,7 +141,7 @@ class UnbindTimeoutTestCase(SimulatorTestCase):
         return smpp
 
 class ResponseTimeoutTestCase(SimulatorTestCase):
-    protocol = NoResponseOnSubmitSMSC
+    protocol = smsc_simulator.NoResponseOnSubmitSMSC
     configArgs = {
         'responseTimerSecs': 0.1,
     }
@@ -147,7 +179,7 @@ class ResponseTimeoutTestCase(SimulatorTestCase):
         self.assertTrue(isinstance(sent, Unbind))
 
 class InactivityTimeoutTestCase(SimulatorTestCase):
-    protocol = HappySMSC
+    protocol = smsc_simulator.HappySMSC
     configArgs = {
         'inactivityTimerSecs': 0.1,
     }
@@ -179,7 +211,7 @@ class InactivityTimeoutTestCase(SimulatorTestCase):
         self.assertTrue(isinstance(sent, Unbind))
 
 class ServerInitiatedUnbindTestCase(SimulatorTestCase):
-    protocol = UnbindOnSubmitSMSC
+    protocol = smsc_simulator.UnbindOnSubmitSMSC
 
     def setUp(self):
         SimulatorTestCase.setUp(self)
@@ -210,7 +242,7 @@ class ServerInitiatedUnbindTestCase(SimulatorTestCase):
         self.assertEquals(UnbindResp(1), sent)
 
 class EnquireLinkTestCase(SimulatorTestCase):
-    protocol = EnquireLinkEchoSMSC
+    protocol = smsc_simulator.EnquireLinkEchoSMSC
     configArgs = {
         'enquireLinkTimerSecs': 0.1,
     }
@@ -280,7 +312,7 @@ class EnquireLinkTestCase(SimulatorTestCase):
         self.assertEquals(EnquireLinkResp(2), sent4)
 
 class TransmitterLifecycleTestCase(SimulatorTestCase):
-    protocol = HappySMSC
+    protocol = smsc_simulator.HappySMSC
 
     def setUp(self):
         SimulatorTestCase.setUp(self)
@@ -305,7 +337,7 @@ class TransmitterLifecycleTestCase(SimulatorTestCase):
         return smpp
 
 class AlertNotificationTestCase(SimulatorTestCase):
-    protocol = AlertNotificationSMSC
+    protocol = smsc_simulator.AlertNotificationSMSC
 
     @defer.inlineCallbacks
     def test_alert_notification(self):
@@ -341,7 +373,7 @@ class AlertNotificationTestCase(SimulatorTestCase):
         self.assertTrue(isinstance(recv3, UnbindResp))
 
 class CommandLengthTooShortTestCase(SimulatorTestCase):
-    protocol = CommandLengthTooShortSMSC
+    protocol = smsc_simulator.CommandLengthTooShortSMSC
 
     def test_generic_nack_on_invalid_cmd_len(self):
         client = SMPPClientTransceiver(self.config, lambda smpp, pdu: None)
@@ -364,7 +396,7 @@ class CommandLengthTooShortTestCase(SimulatorTestCase):
         return mock.DEFAULT
 
 class CommandLengthTooLongTestCase(SimulatorTestCase):
-    protocol = CommandLengthTooLongSMSC
+    protocol = smsc_simulator.CommandLengthTooLongSMSC
     configArgs = {
         'pduReadTimerSecs': 0.1,
     }
@@ -391,7 +423,7 @@ class CommandLengthTooLongTestCase(SimulatorTestCase):
         return mock.DEFAULT
 
 class InvalidCommandIdTestCase(SimulatorTestCase):
-    protocol = InvalidCommandIdSMSC
+    protocol = smsc_simulator.InvalidCommandIdSMSC
 
     @defer.inlineCallbacks
     def test_generic_nack_on_invalid_cmd_id(self):
@@ -415,7 +447,7 @@ class InvalidCommandIdTestCase(SimulatorTestCase):
         return mock.DEFAULT
 
 class NonFatalParseErrorTestCase(SimulatorTestCase):
-    protocol = NonFatalParseErrorSMSC
+    protocol = smsc_simulator.NonFatalParseErrorSMSC
 
     @defer.inlineCallbacks
     def test_nack_on_invalid_msg(self):
@@ -439,7 +471,7 @@ class NonFatalParseErrorTestCase(SimulatorTestCase):
         return mock.DEFAULT
 
 class GenericNackNoSeqNumTestCase(SimulatorTestCase):
-    protocol = GenericNackNoSeqNumOnSubmitSMSC
+    protocol = smsc_simulator.GenericNackNoSeqNumOnSubmitSMSC
 
     @defer.inlineCallbacks
     def test_generic_nack_no_seq_num(self):
@@ -459,7 +491,7 @@ class GenericNackNoSeqNumTestCase(SimulatorTestCase):
         self.assertEquals(0, smpp.sendPDU.call_count)
 
 class GenericNackWithSeqNumTestCase(SimulatorTestCase):
-    protocol = GenericNackWithSeqNumOnSubmitSMSC
+    protocol = smsc_simulator.GenericNackWithSeqNumOnSubmitSMSC
 
     @defer.inlineCallbacks
     def test_generic_nack_no_seq_num(self):
@@ -476,7 +508,7 @@ class GenericNackWithSeqNumTestCase(SimulatorTestCase):
             yield smpp.unbindAndDisconnect()
 
 class ErrorOnSubmitTestCase(SimulatorTestCase):
-    protocol = ErrorOnSubmitSMSC
+    protocol = smsc_simulator.ErrorOnSubmitSMSC
 
     @defer.inlineCallbacks
     def test_error_on_submit(self):
@@ -492,7 +524,7 @@ class ErrorOnSubmitTestCase(SimulatorTestCase):
             yield smpp.unbindAndDisconnect()
 
 class ReceiverLifecycleTestCase(SimulatorTestCase):
-    protocol = DeliverSMAndUnbindSMSC
+    protocol = smsc_simulator.DeliverSMAndUnbindSMSC
 
     @defer.inlineCallbacks
     def test_receiver_lifecycle(self):
@@ -516,7 +548,7 @@ class ReceiverLifecycleTestCase(SimulatorTestCase):
         self.assertEquals(recv2.requireAck(recv2.seqNum), sent2)
 
 class ReceiverDataHandlerExceptionTestCase(SimulatorTestCase):
-    protocol = DeliverSMSMSC
+    protocol = smsc_simulator.DeliverSMSMSC
 
     @defer.inlineCallbacks
     def test_receiver_exception(self):
@@ -543,7 +575,7 @@ class ReceiverDataHandlerExceptionTestCase(SimulatorTestCase):
         raise ValueError('barf')
 
 class ReceiverDataHandlerBadResponseParamTestCase(SimulatorTestCase):
-    protocol = DeliverSMSMSC
+    protocol = smsc_simulator.DeliverSMSMSC
 
     @defer.inlineCallbacks
     def test_receiver_bad_resp_param(self):
@@ -570,7 +602,7 @@ class ReceiverDataHandlerBadResponseParamTestCase(SimulatorTestCase):
         return DataHandlerResponse(delivery_failure_reason=DeliveryFailureReason.PERMANENT_NETWORK_ERROR)
 
 class ReceiverUnboundErrorTestCase(SimulatorTestCase):
-    protocol = DeliverSMBeforeBoundSMSC
+    protocol = smsc_simulator.DeliverSMBeforeBoundSMSC
 
     def setUp(self):
         SimulatorTestCase.setUp(self)
@@ -581,7 +613,7 @@ class ReceiverUnboundErrorTestCase(SimulatorTestCase):
         return self.assertFailure(bindDeferred, SessionStateError)
 
 class OutbindTestCase(SimulatorTestCase):
-    protocol = OutbindSMSC
+    protocol = smsc_simulator.OutbindSMSC
 
     def msgHandler(self, smpp, pdu):
         smpp.unbindAndDisconnect()
