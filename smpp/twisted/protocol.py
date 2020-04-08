@@ -93,11 +93,13 @@ class SMPPProtocolBase(Protocol):
         self.encoder = PDUEncoder()
         self.disconnectedDeferred = defer.Deferred()
         # Overriden in tests
+        #pylint: disable=no-member
         self.callLater = reactor.callLater
         self.port = None
         self.log = logging.getLogger(LOG_CATEGORY)
 
     def config(self):
+        #pylint: disable=no-member
         return self.factory.getConfig()
 
     def connectionMade(self):
@@ -762,7 +764,7 @@ class SMPPServerProtocol(SMPPProtocolBase):
 
         # Jasmin update: dataRequestHandler is set from factory instead of config()
         # Divert received messages to the handler defined in the config
-        # self.dataRequestHandler = lambda *args, **kwargs: self.config().msgHandler(self.system_id, *args, **kwargs)
+        self.dataRequestHandler = lambda *args, **kwargs: self.config().msgHandler(self.system_id, *args, **kwargs)
 
         self.system_id = None
         self.log = logging.getLogger(LOG_CATEGORY)
@@ -774,6 +776,7 @@ class SMPPServerProtocol(SMPPProtocolBase):
 
     def connectionLost(self, reason):
         # Remove this connection from those stored in the factory
+        #pylint: disable=no-member
         self.factory.removeConnection(self)
         SMPPProtocolBase.connectionLost(self, reason)
 
@@ -807,8 +810,10 @@ class SMPPServerProtocol(SMPPProtocolBase):
 
         # Authenticate system_id and password
         try:
+            #pylint: disable=no-member
             iface, auth_avatar, logout = yield self.factory.login(system_id, password, self.transport.getPeer().host)
         except error.UnauthorizedLogin:
+            #pylint: disable=no-member
             if system_id not in list(self.factory.config.systems):
                 self.log.warning('SMPP Bind request failed for system_id: "%s", System ID not configured' % system_id)
                 self.sendErrorResponse(reqPDU, CommandStatus.ESME_RINVSYSID, system_id)
@@ -825,6 +830,7 @@ class SMPPServerProtocol(SMPPProtocolBase):
 
         # Check that system_id hasn't exceeded number of allowed binds
         bind_type = reqPDU.commandId
+        #pylint: disable=no-member
         if not self.factory.canOpenNewConnection(system_id, bind_type):
             self.log.warning('SMPP System %s has exceeded maximum number of %s bindings' % (system_id, bind_type))
             self.sendErrorResponse(reqPDU, CommandStatus.ESME_RBINDFAIL, system_id)
@@ -835,6 +841,7 @@ class SMPPServerProtocol(SMPPProtocolBase):
         self.sessionState = sessionState
         self.bind_type = bind_type
 
+        #pylint: disable=no-member
         self.factory.addBoundConnection(self)
         bound_cnxns = self.factory.getBoundConnections(system_id)
         self.log.info('Bind request succeeded for %s. %d active binds' % (
