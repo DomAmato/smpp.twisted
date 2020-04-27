@@ -13,8 +13,9 @@ Copyright 2009-2010 Mozes, Inc.
    See the License for the specific language governing permissions and
    limitations under the License.
 """
-class SMPPConfig(object):
-    
+
+class SMPPConfig:
+
     def __init__(self, **kwargs):
         self.sessionInitTimerSecs = kwargs.get('sessionInitTimerSecs', 30)
         self.enquireLinkTimerSecs = kwargs.get('enquireLinkTimerSecs', 10)
@@ -22,13 +23,12 @@ class SMPPConfig(object):
         self.responseTimerSecs = kwargs.get('responseTimerSecs', 60)
         self.pduReadTimerSecs = kwargs.get('pduReadTimerSecs', 10)
 
-
 class SMPPClientConfig(SMPPConfig):
-    
+
     def __init__(self, **kwargs):
         super(SMPPClientConfig, self).__init__(**kwargs)
-        self.port = kwargs['port']
         self.host = kwargs['host']
+        self.port = kwargs['port']
         self.username = kwargs['username']
         self.password = kwargs['password']
         self.systemType = kwargs.get('systemType', '')
@@ -36,10 +36,10 @@ class SMPPClientConfig(SMPPConfig):
         self.SSLCertificateFile = kwargs.get('SSLCertificateFile', None)
         self.addressRange = kwargs.get('addressRange', None)
         self.addressTon = kwargs.get('addressTon', None)
-        self.addressNpi = kwargs.get('addressNpi', None)        
+        self.addressNpi = kwargs.get('addressNpi', None)
 
 class SMPPServerConfig(SMPPConfig):
-    
+
     def __init__(self, **kwargs):
         """
         @param systems: A dict of data representing the available
@@ -51,4 +51,3 @@ class SMPPServerConfig(SMPPConfig):
         super(SMPPServerConfig, self).__init__(**kwargs)
         self.systems = kwargs.get('systems', {})
         self.msgHandler = kwargs['msgHandler']
-        

@@ -3,7 +3,7 @@ from twisted.internet import reactor, defer
 from smpp.twisted.client import SMPPClientTransceiver, SMPPClientService
 from smpp.twisted.config import SMPPClientConfig
 
-class SMPP(object):
+class SMPP:
     
     def __init__(self, config=None):
         if config is None:

@@ -1,3 +1,8 @@
+# smpp.twisted
+
+[![Test](https://github.com/DomAmato/smpp.twisted/workflows/Python%20Test/badge.svg)](https://github.com/DomAmato/smpp.twisted/actions)
+[![Coverage Status](https://coveralls.io/repos/github/DomAmato/smpp.twisted/badge.svg?branch=master)](https://coveralls.io/github/DomAmato/smpp.twisted?branch=master)
+
 SMPP 3.4 client built on Twisted
 
 http://www.nowsms.com/discus/messages/1/24856.html
@@ -9,7 +14,7 @@ Example
     from smpp.twisted.client import SMPPClientTransceiver, SMPPClientService
     from smpp.twisted.config import SMPPClientConfig
 
-    class SMPP(object):
+    class SMPP:
 
         def __init__(self, config=None):
             if config is None:
